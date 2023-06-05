@@ -88,5 +88,4 @@ export default {
         jsonResponse.headers.set("content-type", "application/json")
         return jsonResponse
     }
-
 }
