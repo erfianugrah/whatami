@@ -1,8 +1,12 @@
 {
-    "name": "{{ project-name }}",
+    "name": "whatami",
     "version": "1.0.0",
-    "description": "geo",
+    "description": "Cloudflare Worker that displays request metadata",
     "main": "whatami.js",
-    "author": "{{ authors }}",
-    "license": "ISC"
+    "author": "erfianugrah",
+    "license": "ISC",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler publish"
+    }
 }
