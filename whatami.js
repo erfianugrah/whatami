@@ -1,11 +1,46 @@
+function highlightJson(json) {
+  const escaped = json
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  return escaped
+    .replace(
+      /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")\s*:/g,
+      '<span class="json-key">$1</span><span class="json-punctuation">:</span>',
+    )
+    .replace(
+      /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")/g,
+      '<span class="json-string">$1</span>',
+    )
+    .replace(
+      /\b(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g,
+      '<span class="json-number">$1</span>',
+    )
+    .replace(/\b(true|false)\b/g, '<span class="json-boolean">$1</span>')
+    .replace(/\bnull\b/g, '<span class="json-null">null</span>');
+}
+
 export default {
   async fetch(request) {
     const subrequest = new Request(request);
     const newResponse = await fetch(subrequest);
 
-    const requestHeaders = JSON.stringify(Object.fromEntries(subrequest.headers), null, 2);
-    const responseHeaders = JSON.stringify(Object.fromEntries(newResponse.headers), null, 2);
-    const cf = JSON.stringify(request.cf, null, 2);
+    const requestHeadersRaw = JSON.stringify(
+      Object.fromEntries(subrequest.headers),
+      null,
+      2,
+    );
+    const responseHeadersRaw = JSON.stringify(
+      Object.fromEntries(newResponse.headers),
+      null,
+      2,
+    );
+    const cfRaw = JSON.stringify(request.cf, null, 2);
+
+    const requestHeaders = highlightJson(requestHeadersRaw);
+    const responseHeaders = highlightJson(responseHeadersRaw);
+    const cf = highlightJson(cfRaw);
 
     const data = [
       { request: Object.fromEntries(subrequest.headers) },
@@ -15,8 +50,8 @@ export default {
 
     const json = JSON.stringify(data);
 
-    const userAgent = request.headers.get('User-Agent');
-    const isBrowser = userAgent && userAgent.includes('Mozilla');
+    const userAgent = request.headers.get("User-Agent");
+    const isBrowser = userAgent && userAgent.includes("Mozilla");
 
     const htmlStyle = `
       * {
@@ -164,6 +199,14 @@ export default {
         margin: 0;
       }
 
+      /* JSON syntax highlighting */
+      .json-key { color: #7ee787; }
+      .json-string { color: #a5d6ff; }
+      .json-number { color: #79c0ff; }
+      .json-boolean { color: #ff7b72; }
+      .json-null { color: #ff7b72; }
+      .json-punctuation { color: #8b949e; }
+
       pre::-webkit-scrollbar {
         width: 12px;
         height: 12px;
@@ -288,8 +331,14 @@ export default {
             toggle.classList.toggle('collapsed');
           }
 
+          const rawData = {
+            req: ${JSON.stringify(requestHeadersRaw)},
+            res: ${JSON.stringify(responseHeadersRaw)},
+            cf: ${JSON.stringify(cfRaw)}
+          };
+
           function copy(id, btn) {
-            navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+            navigator.clipboard.writeText(rawData[id]).then(() => {
               btn.classList.add('copied');
               btn.textContent = 'copied';
               setTimeout(() => {
@@ -306,21 +355,20 @@ export default {
       const htmlResponse = new Response(html, {
         status: newResponse.status,
         statusText: newResponse.statusText,
-        headers: new Headers(newResponse.headers)
+        headers: new Headers(newResponse.headers),
       });
-      htmlResponse.headers.set('cf-edge-cache', 'no-cache');
-      htmlResponse.headers.set('content-type', 'text/html;charset=UTF-8');
+      htmlResponse.headers.set("cf-edge-cache", "no-cache");
+      htmlResponse.headers.set("content-type", "text/html;charset=UTF-8");
       return htmlResponse;
     }
 
     const jsonResponse = new Response(json, {
       status: newResponse.status,
       statusText: newResponse.statusText,
-      headers: new Headers(newResponse.headers)
+      headers: new Headers(newResponse.headers),
     });
-    jsonResponse.headers.set('cf-edge-cache', 'no-cache');
-    jsonResponse.headers.set('content-type', 'application/json');
+    jsonResponse.headers.set("cf-edge-cache", "no-cache");
+    jsonResponse.headers.set("content-type", "application/json");
     return jsonResponse;
   },
 };
-

@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "whatami",
+  "main": "./whatami.js",
+  "compatibility_date": "2022-10-10",
+  "account_id": "25f21f141824546aa72c74451a11b419",
+
+  "dev": {
+    "port": 9001,
+    "local_protocol": "http",
+    "upstream_protocol": "https"
+  },
+
+  "env": {
+    "staging": {
+      "name": "staging-whatami",
+      "vars": {
+        "ENVIRONMENT": "staging"
+      },
+      "workers_dev": true
+    },
+    "prod": {
+      "name": "prod-whatami",
+      "vars": {
+        "ENVIRONMENT": "production"
+      },
+      "routes": [
+        {
+          "pattern": "whatami.erfi.dev",
+          "zone_id": "d6260a9cd0c27db1e9c0a453b2e4761e",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,7 @@
 {
     "name": "whatami",
     "version": "1.0.0",
+    "type": "module",
     "description": "Cloudflare Worker that displays request metadata",
     "main": "whatami.js",
     "author": "erfianugrah",
