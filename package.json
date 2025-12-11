@@ -8,5 +8,8 @@
     "scripts": {
         "dev": "wrangler dev",
         "deploy": "wrangler publish"
+    },
+    "devDependencies": {
+        "eslint": "^9.39.2"
     }
 }
