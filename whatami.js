@@ -4,21 +4,22 @@ function highlightJson(json) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  return escaped
-    .replace(
-      /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")\s*:/g,
-      '<span class="json-key">$1</span><span class="json-punctuation">:</span>',
-    )
-    .replace(
-      /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")/g,
-      '<span class="json-string">$1</span>',
-    )
-    .replace(
-      /\b(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g,
-      '<span class="json-number">$1</span>',
-    )
-    .replace(/\b(true|false)\b/g, '<span class="json-boolean">$1</span>')
-    .replace(/\bnull\b/g, '<span class="json-null">null</span>');
+  // Single-pass tokenizer to avoid double-wrapping
+  return escaped.replace(
+    /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false)\b|\bnull\b|\b(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g,
+    (match, str, colon, bool, num) => {
+      if (str) {
+        if (colon) {
+          return `<span class='json-key'>${str}</span><span class='json-punctuation'>:</span>`;
+        }
+        return `<span class='json-string'>${str}</span>`;
+      }
+      if (bool) return `<span class='json-boolean'>${bool}</span>`;
+      if (num) return `<span class='json-number'>${num}</span>`;
+      if (match === "null") return `<span class='json-null'>null</span>`;
+      return match;
+    },
+  );
 }
 
 export default {
